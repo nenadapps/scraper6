@@ -51,14 +51,18 @@ def get_html(url):
         pass
     return html_content
 
-def get_categories(url):
-    items = []
+def get_categories():
+    
+    url = 'https://www.candlishmccleery.com/page/home.php'
+    
+    items = {}
     try:
         html = get_html(url)
         category_items = html.find_all('div', attrs={'style': 'margin-left: 0px'})
         for category_item in category_items:
-            item = category_item.find('a').get('href').replace('../', 'https://www.candlishmccleery.com/')
-            items.append(item)
+            item_url = category_item.find('a').get('href').replace('../', 'https://www.candlishmccleery.com/')
+            item_text = category_item.find('a').get_text().strip()
+            items[item_text] = item_url
     except: 
         pass
 
@@ -259,31 +263,33 @@ def db_update_image_download(stamp):
     print (" ")
     sleep(randint(45,140)) 
 
-# start url
-start_url = 'https://www.candlishmccleery.com/page/home.php'
-
 count = 0
 connectTor()
 showmyip()
 
-# loop through all categories
-categories = get_categories(start_url)
-for category in categories:
-    while(category):
+# choose input category
+categories = get_categories()
+for category_item in categories.items():
+    print(category_item)
+
+selected_category_name = input('Make a selection: ')
+category = categories[selected_category_name]
+
+while(category):
+    count += 1
+    page_items, category, category_name = get_page_items(category)
+    # loop through all items on current page
+    for page_item in page_items:
+        stamp = get_details(page_item, category_name)
         count += 1
-        page_items, category, category_name = get_page_items(category)
-        # loop through all items on current page
-        for page_item in page_items:
-            stamp = get_details(page_item, category_name)
-            count += 1
-            if count > randint(75,156):
-                sleep(randint(500,2000))
-                connectTor()
-                showmyip()
-                count = 0
-            else:
-                pass
-            stamp = get_details(category_item, continent)
-            count += len(f_names)
-            query_for_previous(stamp)
-            db_update_image_download(stamp)
+        if count > randint(75,156):
+            sleep(randint(500,2000))
+            connectTor()
+            showmyip()
+            count = 0
+        else:
+            pass
+        stamp = get_details(category_item, continent)
+        count += len(f_names)
+        query_for_previous(stamp)
+        db_update_image_download(stamp)
