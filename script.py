@@ -49,7 +49,7 @@ hdr = {'User-Agent': "'"+UA.random+"'",
 def get_html(url):
     html_content = ''
     try:
-        req = Request(url, headers=hdr)
+        req = Request(url, headers={'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'})
         html_page = urlopen(req).read()
         html_content = BeautifulSoup(html_page, "html.parser")
     except: 
@@ -91,7 +91,8 @@ def get_page_items(url):
     
     try:
         for item in html.select('.categoryProduct'):
-            items.append(item)
+            if item.get_text():
+                items.append(item)
     except: 
         pass
 
