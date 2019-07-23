@@ -49,7 +49,7 @@ hdr = {'User-Agent': "'"+UA.random+"'",
 def get_html(url):
     html_content = ''
     try:
-        req = Request(url, headers=hdr)
+        req = Request(url, headers= {'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'})#hdr)
         html_page = urlopen(req).read()
         html_content = BeautifulSoup(html_page, "html.parser")
     except: 
@@ -131,7 +131,7 @@ def get_details(html, category_name):
 
     try:
         raw_text = html.find_all("div")[0].get_text().strip()
-        stamp['raw_text'] = raw_text
+        stamp['raw_text'] = raw_text.replace('"',"'")
     except:
         stamp['raw_text'] = None
 
@@ -286,6 +286,8 @@ while(category):
     # loop through all items on current page
     for page_item in page_items:
         stamp = get_details(page_item, category_name)
+        if stamp['raw_text']==None or stamp['raw_text']=='':
+        	continue
         count += 1
         if count > randint(75,156):
             sleep(randint(500,2000))
