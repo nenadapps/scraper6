@@ -1,6 +1,7 @@
 import re
 import datetime
 import os
+'''
 import sqlite3
 from fake_useragent import UserAgent
 import shutil
@@ -8,12 +9,13 @@ from stem import Signal
 from stem.control import Controller
 import socket
 import socks
+'''
 import requests
 from random import randint, shuffle
 from time import sleep
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
-
+'''
 controller = Controller.from_port(port=9051)
 controller.authenticate()
 
@@ -29,8 +31,11 @@ def showmyip():
     r = requests.Session()
     page = r.get(url)
     soup = BeautifulSoup(page.content, "lxml")
-    ip_address = soup.find("span",{"class":"ip_address"}).text.strip()
-    print(ip_address)
+    try:
+    	ip_address = soup.find("span",{"class":"ip_address"}).text.strip()
+    	print(ip_address)
+    except:
+    	print('IP printing issue')
     
 UA = UserAgent(fallback='Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2')
 
@@ -40,7 +45,7 @@ hdr = {'User-Agent': "'"+UA.random+"'",
        'Accept-Encoding': 'none',
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
-
+'''
 def get_html(url):
     html_content = ''
     try:
@@ -162,23 +167,23 @@ def get_value(sep1,sep2, string):
     parts1 = string.split(sep1)
     parts2 = parts1[1].split(sep2)
     return parts2[0]
-
+'''
 def file_names(stamp):
     file_name = []
-    rand_string = "RAND_ze"+str(randint(0,100000))
+    rand_string = "RAND_"+str(randint(0,1000000))
     file_name = [rand_string+"-" + str(i) + ".png" for i in range(len(stamp['image_urls']))]
     return(file_name)
 
 def query_for_previous(stamp):
     # CHECKING IF Stamp IN DB
-    os.chdir("/Volumes/stamps_copy/")
+    os.chdir("/Volumes/Stamps/")
     conn1 = sqlite3.connect('Reference_data.db')
     c = conn1.cursor()
     col_nm = 'url'
     col_nm2 = 'raw_text'
     unique = stamp['url']
     unique2 = stamp['raw_text']
-    c.execute('SELECT * FROM zeboose WHERE "{col_nm}" LIKE "{unique}%" AND "{col_nm2}" LIKE "{unique2}%"')
+    c.execute('SELECT * FROM candlishmccleery WHERE "{col_nm}" LIKE "{unique}%" AND "{col_nm2}" LIKE "{unique2}%"')
     all_rows = c.fetchall()
     conn1.close()
     price_update=[]
@@ -200,7 +205,7 @@ def query_for_previous(stamp):
         sleep(randint(10,45))
         pass
     else:
-        os.chdir("/Volumes/stamps_copy/")
+        os.chdir("/Volumes/Stamps/")
         conn2 = sqlite3.connect('Reference_data.db')
         c2 = conn2.cursor()
         c2.executemany("""INSERT INTO price_list (url, raw_text, scrape_date, price, currency) VALUES(?,?,?,?,?)""", price_update)
@@ -210,15 +215,15 @@ def query_for_previous(stamp):
 
 def db_update_image_download(stamp):  
     req = requests.Session()
-    directory = "/Volumes/stamps_copy/stamps/zeboose/" + str(datetime.datetime.today().strftime('%Y-%m-%d')) +"/"
+    directory = "/Volumes/Stamps/stamps/candlishmccleery/" + str(datetime.datetime.today().strftime('%Y-%m-%d')) +"/"
     image_paths = []
-    file_name = file_names(stamp)
-    image_paths = [directory + file_name[i] for i in range(len(file_name))]
+    f_name = file_names(stamp)
+    image_paths = [directory + f_name[i] for i in range(len(f_name))]
     print("image paths", image_paths)
     if not os.path.exists(directory):
         os.makedirs(directory)
     os.chdir(directory)
-    for item in range(0,len(file_name)):
+    for item in range(0,len(f_name)):
         print (stamp['image_urls'][item])
         try:
             imgRequest1=req.get(stamp['image_urls'][item],headers=hdr, timeout=60, stream=True)
@@ -228,7 +233,7 @@ def db_update_image_download(stamp):
             print ("...")
             imgRequest1=req.get(stamp['image_urls'][item], headers=hdr, timeout=60, stream=True)
         if imgRequest1.status_code==200:
-            with open(file_name[item],'wb') as localFile:
+            with open(f_name[item],'wb') as localFile:
                 imgRequest1.raw.decode_content = True
                 shutil.copyfileobj(imgRequest1.raw, localFile)
                 sleep(randint(18,30))
@@ -253,7 +258,7 @@ def db_update_image_download(stamp):
     conn = sqlite3.connect('Reference_data.db')
     conn.text_factory = str
     cur = conn.cursor()
-    cur.executemany("""INSERT INTO zeboose ('url','raw_text', 'title', 'scott_num','SG',
+    cur.executemany("""INSERT INTO candlishmccleery ('url','raw_text', 'title', 'scott_num','SG',
     'country','year','category','sku','scrape_date','image_paths') 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", database_update)
     conn.commit()
@@ -262,10 +267,10 @@ def db_update_image_download(stamp):
     print ("++++++++++++")
     print (" ")
     sleep(randint(45,140)) 
-
+'''
 count = 0
-connectTor()
-showmyip()
+#connectTor()
+#showmyip()
 
 # choose input category
 categories = get_categories()
@@ -284,12 +289,11 @@ while(category):
         count += 1
         if count > randint(75,156):
             sleep(randint(500,2000))
-            connectTor()
-            showmyip()
+            #connectTor()
+            #showmyip()
             count = 0
         else:
             pass
-        stamp = get_details(category_item, continent)
-        count += len(f_names)
-        query_for_previous(stamp)
-        db_update_image_download(stamp)
+        #count += len(file_names(stamp))
+        #query_for_previous(stamp)
+        #db_update_image_download(stamp)
