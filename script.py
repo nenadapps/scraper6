@@ -1,7 +1,6 @@
-import re
 import datetime
-import os
 '''
+import os
 import sqlite3
 from fake_useragent import UserAgent
 import shutil
@@ -9,8 +8,8 @@ from stem import Signal
 from stem.control import Controller
 import socket
 import socks
-'''
 import requests
+'''
 from random import randint, shuffle
 from time import sleep
 from urllib.request import Request, urlopen
@@ -49,7 +48,7 @@ hdr = {'User-Agent': "'"+UA.random+"'",
 def get_html(url):
     html_content = ''
     try:
-        req = Request(url, headers= {'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'})#hdr)
+        req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})#hdr)
         html_page = urlopen(req).read()
         html_content = BeautifulSoup(html_page, "html.parser")
     except: 
@@ -91,7 +90,8 @@ def get_page_items(url):
     
     try:
         for item in html.select('.categoryProduct'):
-            items.append(item)
+            if item.get_text():
+                items.append(item)
     except: 
         pass
 
@@ -136,8 +136,23 @@ def get_details(html, category_name):
         stamp['raw_text'] = None
 
     stamp['category'] = category_name
-
     stamp['currency'] = 'GBP'
+    
+    temp = stamp['raw_text'].split()
+    try:
+    	stamp['SG']=temp[-1]
+    except:
+    	stamp['SG']=None
+    	
+    try:
+    	stamp['year'] = temp[0]
+    except:
+    	stamp['year']=None
+    
+    try:
+    	stamp['face_value']=temp[1]
+    except:
+    	stamp['face_value']=None
 
     # image_urls should be a list
     images = []
@@ -151,7 +166,8 @@ def get_details(html, category_name):
         pass
 
     stamp['image_urls'] = images 
-
+    stamp['url']=stamp['image_urls'][0]
+    
     # scrape date in format YYYY-MM-DD
     scrape_date = datetime.date.today().strftime('%Y-%m-%d')
     stamp['scrape_date'] = scrape_date
@@ -203,6 +219,7 @@ def query_for_previous(stamp):
         print (" ")
         #url_count(count)
         sleep(randint(10,45))
+        next_step = 'continue'
         pass
     else:
         os.chdir("/Volumes/Stamps/")
@@ -211,7 +228,9 @@ def query_for_previous(stamp):
         c2.executemany("""INSERT INTO price_list (url, raw_text, scrape_date, price, currency) VALUES(?,?,?,?,?)""", price_update)
         conn2.commit()
         conn2.close()
+        next_step='pass'
     print("Price Updated")
+    return(next_step)
 
 def db_update_image_download(stamp):  
     req = requests.Session()
@@ -245,22 +264,20 @@ def db_update_image_download(stamp):
     database_update.append((
         stamp['url'],
         stamp['raw_text'],
-        stamp['title'],
-        stamp['scott_num'],
         stamp['SG'],
-        stamp['country'],
         stamp['year'],
+        stamp['face_value'],
         stamp['category'],
         stamp['sku'],
         stamp['scrape_date'],
         stamp['image_paths']))
-    os.chdir("/Volumes/stamps_copy/")
+    os.chdir("/Volumes/Stamps/")
     conn = sqlite3.connect('Reference_data.db')
     conn.text_factory = str
     cur = conn.cursor()
-    cur.executemany("""INSERT INTO candlishmccleery ('url','raw_text', 'title', 'scott_num','SG',
-    'country','year','category','sku','scrape_date','image_paths') 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", database_update)
+    cur.executemany("""INSERT INTO candlishmccleery ('url','raw_text','SG',
+    'year','face_value','category','sku','scrape_date','image_paths')
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", database_update)
     conn.commit()
     conn.close()
     print ("all updated")
@@ -269,9 +286,10 @@ def db_update_image_download(stamp):
     sleep(randint(45,140)) 
 '''
 count = 0
-#connectTor()
-#showmyip()
-
+'''
+connectTor()
+showmyip()
+'''
 # choose input category
 categories = get_categories()
 for category_item in categories.items():
@@ -296,6 +314,16 @@ while(category):
             count = 0
         else:
             pass
-        #count += len(file_names(stamp))
-        #query_for_previous(stamp)
-        #db_update_image_download(stamp)
+        '''
+        count += len(file_names(stamp))
+        next_step = query_for_previous(stamp)
+        if next_step == 'continue':
+        	print('Only updating price')
+        	continue
+        elif next_step == 'pass':
+        	print('Inserting the item')
+        	pass
+        else:
+        	break
+        db_update_image_download(stamp)
+        '''
