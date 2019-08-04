@@ -66,7 +66,7 @@ def get_categories():
         for category_item in category_items:
             item_url = category_item.find('a').get('href').replace('../', 'https://www.candlishmccleery.com/')
             item_text = category_item.find('a').get_text().strip()
-            items[item_text] = item_url
+            items[item_text] = item_url + '&page=all'
     except: 
         pass
 
