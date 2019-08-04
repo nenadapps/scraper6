@@ -1,5 +1,5 @@
-import datetime
-'''
+
+
 import os
 import sqlite3
 from fake_useragent import UserAgent
@@ -9,12 +9,13 @@ from stem.control import Controller
 import socket
 import socks
 import requests
-'''
+
 from random import randint, shuffle
 from time import sleep
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
-'''
+import datetime
+
 controller = Controller.from_port(port=9051)
 controller.authenticate()
 
@@ -44,7 +45,7 @@ hdr = {'User-Agent': "'"+UA.random+"'",
        'Accept-Encoding': 'none',
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
-'''
+
 def get_html(url):
     html_content = ''
     try:
@@ -183,7 +184,7 @@ def get_value(sep1,sep2, string):
     parts1 = string.split(sep1)
     parts2 = parts1[1].split(sep2)
     return parts2[0]
-'''
+
 def file_names(stamp):
     file_name = []
     rand_string = "RAND_"+str(randint(0,1000000))
@@ -284,12 +285,12 @@ def db_update_image_download(stamp):
     print ("++++++++++++")
     print (" ")
     sleep(randint(45,140)) 
-'''
+
 count = 0
-'''
+
 connectTor()
 showmyip()
-'''
+
 # choose input category
 categories = get_categories()
 for category_item in categories.items():
@@ -309,12 +310,11 @@ while(category):
         count += 1
         if count > randint(75,156):
             sleep(randint(500,2000))
-            #connectTor()
-            #showmyip()
+            renew_tor()
+            showmyip()
             count = 0
         else:
             pass
-        '''
         count += len(file_names(stamp))
         next_step = query_for_previous(stamp)
         if next_step == 'continue':
@@ -326,4 +326,4 @@ while(category):
         else:
         	break
         db_update_image_download(stamp)
-        '''
+print('Scrape Complete')
